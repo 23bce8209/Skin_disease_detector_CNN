@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Skin Health | AI Dermatology Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand-primary: #58a6ff;
+      --brand-secondary: #0d8eff;
+      --bg-dark: #0d1117;
+      --bg-medium: #161b22;
+      --border-color: #30363d;
+      --text-primary: #c9d1d9;
+      --text-secondary: #8b949e;
+      --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    /* --- Light Theme Color Scheme --- */
+    .light-theme {
+        --brand-primary: #007bff;
+        --brand-secondary: #0056b3;
+        --bg-dark: #ffffff;
+        --bg-medium: #f8f9fa;
+        --border-color: #dee2e6;
+        --text-primary: #212529;
+        --text-secondary: #6c757d;
+    }
+
+    /* --- Global & Reset --- */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    html {
+      scroll-behavior: smooth;
+    }
+    body {
+      margin: 0;
+      font-family: var(--font-family);
+      background-color: var(--bg-dark);
+      color: var(--text-primary);
+      font-size: 16px;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      
+      /* --- Prevents text selection/copying (REMOVED - affects UX) --- */
+      /* user-select: none; */
+    }
+    main {
+      flex-grow: 1;
+    }
+    h1, h2, h3, h4 {
+      margin: 0;
+      font-weight: 700;
+    }
+    p {
+      margin: 0;
+      line-height: 1.6;
+    }
+    .hidden {
+      display: none;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 4rem 1.5rem;
+    }
+    .section-title {
+      text-align: center;
+      color: var(--brand-primary);
+      margin-bottom: 2rem;
+      font-size: 2.5rem;
+    }
+
+    /* --- Header --- */
+    header {
+      background: rgba(13, 17, 23, 0.8);
+      backdrop-filter: blur(10px);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .light-theme header {
+        background: rgba(255, 255, 255, 0.8);
+    }
+    .logo {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--brand-primary);
+    }
+    nav {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    nav a {
+      margin: 0 0.5rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: color 0.2s ease;
+      text-decoration: none;
+    }
+    nav a:hover {
+      color: var(--brand-primary);
+    }
+    
+    /* --- Theme Toggle Switch --- */
+    .theme-switch-wrapper {
+        display: flex;
+        align-items: center;
+    }
+    .theme-switch {
+        display: inline-block;
+        height: 24px;
+        position: relative;
+        width: 44px;
+        margin-left: 1rem;
+    }
+    .theme-switch input {
+        display:none;
+    }
+    .slider {
+        background-color: #30363d;
+        bottom: 0;
+        cursor: pointer;
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+        transition: .4s;
+        border-radius: 34px;
+    }
+    .slider:before {
+        background-color: #fff;
+        bottom: 4px;
+        content: "";
+        height: 16px;
+        left: 4px;
+        position: absolute;
+        transition: .4s;
+        width: 16px;
+        border-radius: 50%;
+    }
+    input:checked + .slider {
+        background-color: var(--brand-primary);
+    }
+    input:checked + .slider:before {
+        transform: translateX(20px);
+    }
+
+    /* --- Buttons --- */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      font-family: var(--font-family);
+    }
+    .btn-primary {
+      background-color: var(--brand-primary);
+      color: #fff;
+    }
+    .light-theme .btn-primary {
+        color: #fff;
+    }
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--brand-secondary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(13, 142, 255, 0.3);
+    }
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+    }
+    .btn-secondary:hover {
+      background: var(--bg-medium);
+      border-color: var(--text-secondary);
+    }
+    .btn:disabled {
+      background-color: #30363d;
+      color: var(--text-secondary);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+      opacity: 0.6;
+    }
+
+    /* --- Modal Popup Styles --- */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+        backdrop-filter: blur(5px);
+        opacity: 1;
+        transition: opacity 0.3s ease;
+    }
+    .modal-overlay.hidden {
+        opacity: 0;
+        pointer-events: none; 
+    }
+    .modal-content {
+        max-width: 400px;
+        width: 90%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transform: scale(1);
+        transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    .modal-overlay.hidden .modal-content {
+        transform: scale(0.95);
+    }
+
+    /* --- Hero Section --- */
+    .hero {
+      text-align: center;
+      padding: 6rem 1.5rem 4rem;
+    }
+    .hero h1 {
+      font-size: 3.5rem;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+    }
+    .hero h1 span {
+      color: var(--brand-primary);
+    }
+    .hero p {
+      max-width: 600px;
+      margin: 0 auto 2rem auto;
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+    }
+    
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        max-width: 900px;
+        margin: 4rem auto 0;
+        text-align: left;
+    }
+    .feature-card {
+        background-color: var(--bg-medium);
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .feature-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(88, 166, 255, 0.2);
+    }
+    .feature-card h4 {
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+    .feature-card p {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    /* --- Generic Card Style --- */
+    .card {
+      background-color: var(--bg-medium);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    }
+    .light-theme .card {
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
+    }
+    
+    #about .card h4 {
+        color: var(--brand-primary);
+        margin-bottom: 0.5rem;
+        font-size: 1.25rem;
+    }
+    #about .card p {
+        color: var(--text-secondary);
+    }
+    #about .card > div:not(:last-child) {
+        margin-bottom: 1.5rem;
+    }
+
+    /* --- Upload Section --- */
+    #upload .card {
+      text-align: center;
+    }
+    #image-input {
+      display: none;
+    }
+    .upload-area {
+      border: 2px dashed var(--border-color);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+      cursor: pointer;
+      transition: border-color 0.2s ease, background-color 0.2s ease;
+      min-height: 250px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .upload-area:hover {
+      border-color: var(--brand-primary);
+      background-color: rgba(88, 166, 255, 0.05);
+    }
+    .upload-area p {
+      color: var(--text-secondary);
+      margin-top: 1rem;
+    }
+    .upload-preview {
+      min-height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+    .upload-preview img {
+      max-width: 100%;
+      max-height: 300px;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    /* --- Form Styles --- */
+    .form-group {
+      text-align: left;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      font-size: 1rem;
+      font-family: var(--font-family);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--brand-primary);
+      box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+    }
+    .form-group select {
+      cursor: pointer;
+    }
+
+    /* Additional styles for form inputs on light theme */
+    .light-theme input,
+    .light-theme select {
+      background: #ffffff !important;
+      border-color: #dee2e6 !important;
+      color: #212529 !important;
+    }
+    .light-theme input:focus,
+    .light-theme select:focus {
+      border-color: var(--brand-primary) !important;
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1) !important;
+    }
+    .light-theme input::placeholder {
+      color: #6c757d;
+    }
+
+    /* Form validation styles */
+    input:invalid:not(:placeholder-shown),
+    select:invalid:not(:placeholder-shown) {
+      border-color: #ff8585 !important;
+    }
+    input:valid:not(:placeholder-shown):not([type="file"]),
+    select:valid:not(:placeholder-shown) {
+      border-color: #58a6ff;
+    }
+
+    /* --- Results & Doctors Section --- */
+    .result-grid {
+      display: grid;
+      gap: 1.5rem;
+    }
+    .result-card, .doctor-card {
+      background-color: var(--bg-medium);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+    .result-card h3 {
+      color: var(--brand-primary);
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+    }
+    .result-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+    }
+    .result-item b {
+      font-size: 1.5rem;
+      color: var(--text-primary);
+    }
+    #result-advice {
+      white-space: pre-wrap;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    #doctor-list {
+        display: grid;
+        gap: 1rem;
+    }
+    .doctor-card {
+        padding: 1rem 1.5rem;
+        transition: transform 0.2s ease;
+    }
+    .doctor-card:hover {
+        transform: translateX(4px);
+        border-color: var(--brand-primary);
+    }
+    
+    /* --- Footer --- */
+    footer {
+      background-color: var(--bg-dark);
+      border-top: 1px solid var(--border-color);
+      padding: 3rem 1.5rem;
+      color: var(--text-secondary);
+    }
+    .footer-content {
+        max-width: 1000px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 2rem;
+        text-align: left;
+    }
+    .footer-column h4 {
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+    .footer-column p, .footer-column a {
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+        text-decoration: none;
+        display: block;
+        margin-bottom: 0.5rem;
+        transition: color 0.2s ease;
+        cursor: pointer;
+    }
+    .footer-column a:hover {
+        color: var(--brand-primary);
+    }
+    .footer-bottom {
+        text-align: center;
+        margin-top: 3rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+        font-size: 0.9rem;
+    }
+    
+    /* --- Responsive Design --- */
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 2.5rem; }
+      .container { padding: 3rem 1rem; }
+      header { padding: 1rem; }
+      .footer-content { text-align: center; }
+      nav { gap: 0.5rem; }
+      nav a { margin: 0; font-size: 0.9rem; }
+      #combined-form > div[style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important;
+      }
+      .result-card[style*="grid-template-columns"] > div {
+        grid-template-columns: 1fr !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">Smart Skin Health</div>
+    <nav>
+      <a onclick="goTo('landing')">Home</a>
+      <a onclick="goTo('about')">About</a>
+      <div class="theme-switch-wrapper">
+        <label class="theme-switch" for="theme-toggle">
+            <input type="checkbox" id="theme-toggle" />
+            <span class="slider"></span>
+        </label>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section id="landing" class="hero">
+        <h1>Your Personal AI <span>Dermatology Assistant</span></h1>
+        <p>Upload an image of a skin condition and get instant, AI-powered insights. Fast, private, and informative.</p>
+        
+        <button class="btn btn-primary" onclick="goTo('upload')">Get Started Now</button>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <h4>⚡ Instant AI Analysis</h4>
+                <p>Our model, trained on thousands of images, provides a quick preliminary analysis of your skin condition.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🧑‍⚕️ Actionable Guidance</h4>
+                <p>Receive clear, concise advice and information, helping you have a more informed discussion with a doctor.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🔒 100% Private & Secure</h4>
+                <p>Your images are processed anonymously and are never stored. Your privacy is our top priority.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="container hidden">
+      <h2 class="section-title">Bridging Technology and Your Health</h2>
+      <div class="card">
+        <div>
+            <p>Navigating skin health concerns can be stressful and confusing. Smart Skin Health was created to empower you with immediate, data-driven insights so you can take the next step with confidence.</p>
+        </div>
+        <div>
+            <h4>How It Works</h4>
+            <p>Our advanced AI analyzes your image against a vast database of dermatological conditions to provide a preliminary analysis in seconds. We translate complex data into a clear, understandable result, helping you make sense of what might be going on.</p>
+        </div>
+        <div>
+            <h4>Our Philosophy</h4>
+            <p>We believe technology works best when it supports—not replaces—professional medical expertise. Our platform is a powerful informational tool designed to be your first step. It gives you the clarity needed for a more informed conversation with a qualified dermatologist, because a final diagnosis should always come from a certified medical professional.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="upload" class="container hidden">
+        <h2 class="section-title">Analyze Your Image</h2>
+        <div class="card">
+            <!-- Image Upload Area -->
+            <label for="image-input" class="upload-area" id="upload-label">
+                <div class="upload-preview" id="preview">
+                    <div>
+                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-secondary);"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        <p>Click or drag image to upload</p>
+                    </div>
+                </div>
+            </label>
+            <input id="image-input" type="file" accept="image/*" onchange="previewImage(event)"/>
+
+            <!-- Patient Details Form -->
+            <div id="patient-details-form" style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border-color);">
+              <h3 style="color: var(--brand-primary); margin-bottom: 1.5rem; text-align: center;">Patient Information</h3>
+              
+              <form id="combined-form" style="display: grid; gap: 1.5rem;">
+                
+                <!-- Patient Name -->
+                <div class="form-group">
+                  <label for="name">Patient Name *</label>
+                  <input 
+                    type="text" 
+                    id="name" 
+                    required 
+                    placeholder="Enter patient name"
+                  >
+                </div>
+
+                <!-- Age & Gender Row -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                  <div class="form-group">
+                    <label for="age">Age *</label>
+                    <input 
+                      type="number" 
+                      id="age" 
+                      required 
+                      min="1" 
+                      max="120"
+                      placeholder="Enter age"
+                    >
+                  </div>
+
+                  <div class="form-group">
+                    <label for="gender">Gender *</label>
+                    <select id="gender" required>
+                      <option value="">Select Gender</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- WhatsApp Number -->
+                <div class="form-group">
+                  <label for="whatsapp">WhatsApp Number *</label>
+                  <input 
+                    type="tel" 
+                    id="whatsapp" 
+                    placeholder="+91XXXXXXXXXX" 
+                    required
+                    pattern="^\+91[0-9]{10}$"
+                  >
+                  <small style="display: block; margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">
+                    Include country code (e.g., +91 for India)
+                  </small>
+                </div>
+
+                <!-- Single Analyze Button -->
+                <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 0.5rem;">
+                  <button type="submit" id="analyze-btn" class="btn btn-primary" disabled>
+                     Analyze & Process
+                  </button>
+                </div>
+              </form>
+            </div>
+        </div>
+    </section>
+
+    <section id="processing" class="container hidden" style="text-align:center;">
+      <h2 class="section-title">Analyzing...</h2>
+      <p style="color: var(--text-secondary); margin-bottom: 2rem;">Our AI is processing your image. This won't take long.</p>
+       <div class="progress-bar" style="width: 100%; max-width: 500px; height: 8px; background: var(--bg-medium); border-radius: 4px; overflow: hidden; margin: 20px auto;">
+         <div class="progress-fill" id="progress" style="height: 100%; width: 0%; background: var(--brand-primary); transition: width 0.3s;"></div>
+       </div>
+    </section>
+
+    <section id="results" class="container hidden">
+        <h2 class="section-title">Analysis Complete</h2>
+        
+        <!-- Patient Info Card -->
+        <div class="result-card" style="margin-bottom: 1.5rem;">
+            <h3 style="color: var(--brand-primary); margin-bottom: 1rem;">Patient Information</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+              <div>
+                  <span style="color: var(--text-secondary); font-size: 0.9rem;">Name</span>
+                  <p style="font-weight: 500; margin-top: 0.25rem;" id="display-name">-</p>
+              </div>
+              <div>
+                  <span style="color: var(--text-secondary); font-size: 0.9rem;">Age</span>
+                  <p style="font-weight: 500; margin-top: 0.25rem;" id="display-age">-</p>
+              </div>
+              <div>
+                  <span style="color: var(--text-secondary); font-size: 0.9rem;">Gender</span>
+                  <p style="font-weight: 500; margin-top: 0.25rem;" id="display-gender">-</p>
+              </div>
+            </div>
+        </div>
+
+        <div class="result-grid">
+            <div class="result-card">
+              <h3>Most Likely Condition</h3>
+              <div class="result-item">
+                  <span style="color:var(--text-secondary)">Prediction</span>
+                  <b id="result-disease">-</b>
+              </div>
+            </div>
+            <div class="result-card">
+              <h3>Prevention & Treatment Advice</h3>
+              <p id="result-advice">-</p>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 2rem; display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+            <button class="btn btn-primary" onclick="generateAndSendPDF()" id="send-pdf-btn">
+               Generate & Send PDF to WhatsApp
+            </button>
+            <button class="btn btn-primary" onclick="fetchDoctors()">
+               Find Doctors Near Me
+            </button>
+            <button class="btn btn-secondary" onclick="goTo('upload'); resetForm()">
+               Analyze Another Image
+            </button>
+        </div>
+
+        <!-- PDF Success Message -->
+        <div id="pdf-success" class="hidden" style="margin-top: 2rem; padding: 1.5rem; background: rgba(88, 166, 255, 0.1); border: 1px solid var(--brand-primary); border-radius: 12px; text-align: center;">
+            <h3 style="color: var(--brand-primary); margin-bottom: 0.5rem;">✅ Report Sent Successfully!</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">PDF report has been generated and sent to WhatsApp</p>
+            <a id="pdf-download-link" href="#" download="DermaAssist_Report.pdf" class="btn btn-secondary" style="text-decoration: none;">
+               Download PDF
+            </a>
+        </div>
+    </section>
+
+    <section id="doctors" class="container hidden">
+      <h2 class="section-title">Doctors Near You</h2>
+      <p style="text-align:center; color: var(--text-secondary); margin-bottom: 2rem;">Based on your location: <b id="location-name" style="color: var(--text-primary)">-</b></p>
+      <div id="doctor-list"></div>
+      <div style="text-align: center; margin-top: 2rem;">
+        <button class="btn btn-secondary" onclick="goTo('results')">← Back to Results</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="error-modal" class="modal-overlay hidden">
+    <div class="modal-content card">
+        <h3 style="color: #ff8585; margin-bottom: 1rem; text-align: center;">⚠️ Analysis Failed</h3>
+        <p id="error-message" style="color: var(--text-secondary); text-align: center; margin-bottom: 1.5rem;"></p>
+        <button class="btn btn-primary" onclick="hideErrorModal()">Got it</button>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-content">
+        <div class="footer-column">
+            <h4>About Smart Skin Health</h4>
+            <p>An AI-powered informational tool to provide preliminary insights into skin conditions, encouraging informed consultations with dermatologists.</p>
+        </div>
+        <div class="footer-column">
+            <h4>Quick Links</h4>
+            <a onclick="goTo('landing')">Home</a>
+            <a onclick="goTo('about')">About Us</a>
+            <a onclick="goTo('upload')">Start Analysis</a>
+        </div>
+        <div class="footer-column">
+            <h4>Important Notice</h4>
+            <p>This tool is not a medical diagnosis. The analysis is for informational purposes only. Always consult a qualified medical professional for any health concerns.</p>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>© 2025 Smart Skin Health. All Rights Reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    // For local Docker Compose networking
+    const API_URL =
+      window.location.hostname.includes("localhost") ||
+      window.location.hostname.includes("127.0.0.1")
+      ? "http://localhost:5000"
+      : "https://07SAROJ-SmartSkinAI-Backend.hf.space";  // or your Railway / Render URL /huggingface space URL
+
+
+    let currentPatientData = null;
+
+    // Navigation function
+    function goTo(id) {
+      document.querySelectorAll("main > section").forEach(sec => sec.classList.add("hidden"));
+      const targetSection = document.getElementById(id);
+      if (targetSection) {
+        targetSection.classList.remove("hidden");
+      }
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+
+    // Modal Control Functions
+    function showErrorModal(message) {
+        document.getElementById('error-message').innerText = message;
+        document.getElementById('error-modal').classList.remove('hidden');
+    }
+
+    function hideErrorModal() {
+        document.getElementById('error-modal').classList.add('hidden');
+        goTo('upload'); 
+    }
+
+    // Preview Image Function
+    function previewImage(event) {
+      const file = event.target.files[0];
+      const analyzeBtn = document.getElementById("analyze-btn");
+      const preview = document.getElementById("preview");
+      
+      if (file) {
+          const img = document.createElement("img");
+          img.src = URL.createObjectURL(file);
+          preview.innerHTML = "";
+          preview.appendChild(img);
+          
+          // Enable button only if file is selected
+          analyzeBtn.disabled = false;
+      } else {
+          preview.innerHTML = `<div><svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-secondary);"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg><p>Click or drag image to upload</p></div>`;
+          analyzeBtn.disabled = true;
+      }
+    }
+
+    // Combined Form Submission Handler
+    document.getElementById('combined-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const fileInput = document.getElementById('image-input');
+      const file = fileInput.files[0];
+      
+      if (!file) {
+          showErrorModal("Please select an image file before analyzing.");
+          return;
+      }
+
+      // Store patient data
+      currentPatientData = {
+          name: document.getElementById('name').value,
+          age: document.getElementById('age').value,
+          gender: document.getElementById('gender').value,
+          whatsapp: document.getElementById('whatsapp').value
+      };
+
+      // Start processing
+      goTo('processing');
+
+      let progress = 0;
+      const bar = document.getElementById("progress");
+      const interval = setInterval(() => {
+          progress = Math.min(progress + 10, 90);
+          bar.style.width = progress + "%";
+      }, 150);
+
+      const formData = new FormData();
+      formData.append('image', file);  // ✅ Changed from 'file' to 'image' to match backend
+
+      // Debug log
+      console.log('Sending file:', file.name, 'Size:', file.size, 'Type:', file.type);
+
+      try {
+          const response = await fetch(`${API_URL}/api/predict`, {
+            method: 'POST',
+            body: formData,
+            // Don't set Content-Type header - let browser set it with boundary
+          });
+          
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || `Server error: ${response.status}`);
+          }
+          
+          // Store prediction data globally for PDF generation
+          window.lastPredictionData = {
+            description: data.description,
+            medication: data.medication,
+            diet: data.diet
+          };
+          
+          // Display results - Backend returns: disease, description, medication, diet
+          document.getElementById('result-disease').innerText = data.disease || 'Unknown';
+          
+          // Format the advice section with all information
+          let adviceText = '';
+          if (data.description && Array.isArray(data.description)) {
+            adviceText += data.description.join(' ') + '\n\n';
+          }
+          if (data.medication) {
+            adviceText += '💊 Medication:\n' + data.medication + '\n\n';
+          }
+          if (data.diet) {
+            adviceText += '🍎 Diet Recommendation:\n' + data.diet;
+          }
+          
+          document.getElementById('result-advice').innerText = adviceText || 'No advice available';
+          
+          // Display patient info
+          document.getElementById('display-name').innerText = currentPatientData.name;
+          document.getElementById('display-age').innerText = currentPatientData.age;
+          document.getElementById('display-gender').innerText = currentPatientData.gender;
+          
+          clearInterval(interval);
+          bar.style.width = "100%";
+          
+          // Hide PDF success message if previously shown
+          document.getElementById('pdf-success').classList.add('hidden');
+          
+          setTimeout(() => goTo('results'), 500);
+
+      } catch (error) {
+          clearInterval(interval);
+          bar.style.width = "0%";
+          showErrorModal(error.message || 'An error occurred during analysis');
+          console.error("Error during prediction:", error);
+      }
+    });
+
+    // Generate and Send PDF Function
+    async function generateAndSendPDF() {
+      const sendBtn = document.getElementById('send-pdf-btn');
+      const originalText = sendBtn.innerHTML;
+      
+      if (!currentPatientData) {
+          showErrorModal('Patient data not found. Please analyze an image first.');
+          return;
+      }
+
+      sendBtn.disabled = true;
+      sendBtn.innerHTML = '⏳ Generating PDF...';
+
+      try {
+          const reportData = {
+            name: currentPatientData.name,
+            age: currentPatientData.age,
+            gender: currentPatientData.gender,
+            whatsapp: currentPatientData.whatsapp,
+            disease: document.getElementById('result-disease').innerText,
+            // Extract description, medication, and diet from the stored data
+            description: window.lastPredictionData?.description || [],
+            medication: window.lastPredictionData?.medication || '',
+            diet: window.lastPredictionData?.diet || ''
+          };
+
+          const response = await fetch(`${API_URL}/api/save-prescription`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(reportData)
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to generate and send report');
+          }
+
+          const data = await response.json();
+          
+          // Show success message
+          document.getElementById('pdf-success').classList.remove('hidden');
+          const downloadLink = document.getElementById('pdf-download-link');
+          downloadLink.href = data.pdf_url || data.pdf_path || '#';
+          
+          // Scroll to success message
+          document.getElementById('pdf-success').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          
+          sendBtn.innerHTML = '✅ Sent Successfully!';
+          
+          setTimeout(() => {
+            sendBtn.innerHTML = originalText;
+            sendBtn.disabled = false;
+          }, 3000);
+
+      } catch (error) {
+          console.error('Error generating report:', error);
+          showErrorModal('Failed to generate and send report. Please try again.');
+          sendBtn.innerHTML = originalText;
+          sendBtn.disabled = false;
+      }
+    }
+
+    // Reset Form Function
+    function resetForm() {
+      document.getElementById('combined-form').reset();
+      document.getElementById('image-input').value = '';
+      document.getElementById('preview').innerHTML = `<div><svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-secondary);"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg><p>Click or drag image to upload</p></div>`;
+      document.getElementById('analyze-btn').disabled = true;
+      document.getElementById('pdf-success').classList.add('hidden');
+      currentPatientData = null;
+    }
+    
+    // Fetch Doctors Function
+    function fetchDoctors() {
+        const doctorList = document.getElementById('doctor-list');
+        const locationName = document.getElementById('location-name');
+        
+        goTo('doctors');
+        locationName.innerText = "fetching...";
+        doctorList.innerHTML = `<p style="text-align:center; color:var(--text-secondary)">Getting your location and finding doctors...</p>`;
+
+        if (!navigator.geolocation) {
+            doctorList.innerHTML = `<p style="text-align:center; color:#ff8585;">Geolocation is not supported by your browser.</p>`;
+            locationName.innerText = "Unknown";
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(async (position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            
+            try {
+                const response = await fetch(`${API_URL}/find_doctors?lat=${lat}&lon=${lon}`);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `Server error: ${response.status}`);
+                }
+                const data = await response.json();
+
+                locationName.innerText = data.area_name || 'Your Area';
+                doctorList.innerHTML = "";
+                
+                if (data.doctors && data.doctors.length > 0) {
+                    data.doctors.forEach(doctor => {
+                        const doctorCard = document.createElement('div');
+                        doctorCard.className = 'doctor-card';
+                        doctorCard.innerHTML = `
+                          <h3 style="margin-bottom:0.5rem; color: var(--text-primary);">${doctor.name}</h3>
+                          <p style="color:var(--text-secondary)">${doctor.address || 'Address not available'}</p>
+                        `;
+                        doctorList.appendChild(doctorCard);
+                    });
+                } else {
+                    doctorList.innerHTML = `<p style="text-align:center; color:var(--text-secondary)">No doctors found nearby. Try expanding your search area.</p>`;
+                }
+            } catch (error) {
+                doctorList.innerHTML = `<p style="text-align:center; color:#ff8585;">An error occurred: ${error.message}</p>`;
+                console.error("Error fetching doctors:", error);
+            }
+        }, (err) => {
+            console.error('Geolocation error:', err);
+            doctorList.innerHTML = `<p style="text-align:center; color:#ff8585;">Unable to retrieve your location. Please grant location permission and try again.</p>`;
+            locationName.innerText = "Unknown";
+        });
+    }
+
+    // Theme Toggle Handler
+    document.addEventListener('DOMContentLoaded', () => {
+        const themeToggle = document.getElementById('theme-toggle');
+        const currentTheme = localStorage.getItem('theme');
+
+        if (currentTheme === 'light-theme') {
+            document.body.classList.add('light-theme');
+            themeToggle.checked = true;
+        }
+
+        themeToggle.addEventListener('change', function() {
+            if (this.checked) {
+                document.body.classList.add('light-theme');
+                localStorage.setItem('theme', 'light-theme');
+            } else {
+                document.body.classList.remove('light-theme');
+                localStorage.setItem('theme', 'dark-theme');
+            }
+        });
+
+        // Initial page load
+        goTo('landing');
+    });
+  </script>
+</body>
+</html
