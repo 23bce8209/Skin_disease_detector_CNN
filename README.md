@@ -1,0 +1,1 @@
+# Skin_disease_detector_CNN
