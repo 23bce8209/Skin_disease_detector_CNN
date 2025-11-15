@@ -172,44 +172,6 @@ def preprocess_image(image_file):
         print(f"❌ Preprocessing error: {e}")
         raise
 
-# def preprocess_image(image_file):
-#     img = Image.open(image_file).convert("RGB")
-#     img = img.resize((224, 224))
-#     img_array = np.array(img) / 255.0
-#     return np.expand_dims(img_array, axis=0)
-
-# def preprocess_image(image_file):
-#     """
-#     Preprocess image using ResNet preprocessing - MATCHES YOUR TRAINING CODE!
-#     """
-#     try:
-#         # Open and convert image
-#         img = Image.open(image_file).convert("RGB")
-#         print(f"📸 Original image size: {img.size}")
-        
-#         # Resize to model input size
-#         img = img.resize((224, 224))
-        
-#         # Convert to array
-#         img_array = np.array(img, dtype=np.float32)
-#         print(f"📊 Image array shape: {img_array.shape}")
-#         print(f"📊 Pixel value range before preprocessing: [{img_array.min():.1f}, {img_array.max():.1f}]")
-        
-#         # ✅ CRITICAL FIX: Use ResNet preprocessing (same as training!)
-#         img_array = preprocess_input(img_array)
-        
-#         print(f"📊 After preprocessing range: [{img_array.min():.4f}, {img_array.max():.4f}]")
-        
-#         # Add batch dimension
-#         img_batch = np.expand_dims(img_array, axis=0)
-#         print(f"📊 Final batch shape: {img_batch.shape}")
-        
-#         return img_batch
-        
-#     except Exception as e:
-#         print(f"❌ Preprocessing error: {e}")
-#         raise
-
 @app.route("/")
 def home():
     return "✅ SmartSkinAI Backend is Running!"
@@ -234,14 +196,7 @@ def predict():
         print("📚 Available Disease Info Keys:", list(DISEASE_INFO.keys()))
 
         
-        # disease_info = DISEASE_INFO.get(pred_class)
-
-        # return jsonify({
-        #     "disease": disease_info["name"],
-        #     "description": disease_info["description"],
-        #     "medication": disease_info["medication"],
-        #     "diet": disease_info["diet"]
-        # })
+    
 
         disease_info = DISEASE_INFO.get(pred_class)
 
@@ -260,15 +215,6 @@ def predict():
             "medication": disease_info["medication"],
             "diet": disease_info["diet"]
         })
-
-        # if not disease_info:
-        #     print(f"⚠️ No matching disease info for: {pred_class}")
-        #     return jsonify({
-        #         "disease": pred_class,
-        #         "description": ["Information not found for this class."],
-        #         "medication": "N/A",
-        #         "diet": "N/A"
-        #     }), 200
 
         
     except Exception as e:
